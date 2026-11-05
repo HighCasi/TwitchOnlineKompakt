@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitch Streamer Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        /* Toast Animations */
+        .toast-enter { transform: translateY(100%); opacity: 0; }
+        .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toast-exit { transform: translateY(0); opacity: 1; }
+        .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        /* Accordion Styles */
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
+        
+        .chat-container { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="bg-[#0e0e10] text-gray-200 font-sans min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-[#18181b] border-b border-gray-800 p-3 sm:p-4 shadow-md sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <svg class="w-6 h-6 sm:w-8 sm:h-8 text-[#bf94ff]" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+                <h1 class="text-lg sm:text-xl font-bold tracking-wide text-white">Twitch Tracker</h1>
+            </div>
+            <div class="flex gap-2">
+                <button id="install-btn" onclick="installApp()" class="hidden bg-green-600 hover:bg-green-500 text-white p-2 sm:px-3 sm:py-2 rounded-lg transition items-center justify-center gap-2 shadow text-sm min-h-[40px]" title="App installieren">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span class="hidden sm:inline">Installieren</span>
+                </button>
+                <button onclick="refreshData()" class="bg-gray-700 hover:bg-gray-600 text-white p-2 sm:px-3 sm:py-2 rounded-lg transition flex items-center justify-center gap-2 shadow text-sm min-h-[40px]" title="Aktualisieren">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <span class="hidden sm:inline">Refresh</span>
+                </button>
+                <button onclick="toggleSettings()" class="bg-[#9146FF] hover:bg-[#772ce8] text-white p-2 sm:px-3 sm:py-2 rounded-lg transition flex items-center justify-center gap-2 shadow text-sm min-h-[40px]" title="Einstellungen">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-5xl w-full mx-auto p-3 sm:p-4 flex flex-col gap-6">
+        
+        <!-- Add Streamer Section -->
+        <div id="add-section" class="bg-[#18181b] p-3 sm:p-4 rounded-xl border border-gray-800 shadow-sm transition-all">
+            <form onsubmit="addStreamer(event)" class="flex gap-2">
+                <input type="text" id="streamer-input" placeholder="Twitch Name (z.B. gronkh)" required class="flex-1 bg-[#0e0e10] border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#bf94ff] text-sm sm:text-base min-h-[40px]">
+                <button type="submit" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm min-h-[40px] text-sm">Add</button>
+            </form>
+        </div>
+
+        <!-- Online Streamers -->
+        <div>
+            <h2 class="text-sm sm:text-base font-bold mb-3 flex items-center gap-2 text-gray-100">
+                <span class="relative flex h-2.5 w-2.5">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                </span>
+                LIVE KANÄLE
+                <span id="online-count" class="text-xs font-normal text-gray-500 ml-1">(0)</span>
+            </h2>
+            <div id="online-list" class="flex flex-col gap-3">
+                <p class="text-gray-600 text-xs italic empty-msg">Keine aktiven Streams.</p>
+            </div>
+        </div>
+
+        <!-- Offline Streamers -->
+        <div class="mt-4">
+            <h2 class="text-sm sm:text-base font-bold mb-3 flex items-center gap-2 text-gray-400">
+                <span class="w-2.5 h-2.5 bg-gray-600 rounded-full"></span>
+                OFFLINE
+                <span id="offline-count" class="text-xs font-normal text-gray-600 ml-1">(0)</span>
+            </h2>
+            <div id="offline-list" class="grid grid-cols-1 gap-3">
+                <p class="text-gray-600 text-xs italic empty-msg">Keine Offline-Kanäle.</p>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/90 hidden flex items-start sm:items-center justify-center z-50 p-4 pt-10 sm:pt-4 pb-20">
+        <div class="bg-[#18181b] p-5 sm:p-6 pb-8 rounded-2xl border border-gray-800 shadow-2xl max-w-md w-full relative max-h-[85vh] overflow-y-auto flex flex-col">
+            <h2 class="text-xl font-bold mb-2 text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#bf94ff]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Einstellungen
+            </h2>
+            <p class="text-xs text-gray-400 mb-5">Verbinde die App lokal mit der Twitch API, um Live-Daten abzurufen.</p>
+            
+            <div class="flex flex-col gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">Twitch Client ID</label>
+                    <input type="text" id="client-id-input" class="w-full bg-[#0e0e10] border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#bf94ff] text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1.5">OAuth Access Token</label>
+                    <input type="password" id="oauth-token-input" placeholder="Ohne 'Bearer ' Präfix" class="w-full bg-[#0e0e10] border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#bf94ff] text-sm">
+                </div>
+            </div>
+
+            <!-- Appearance Section -->
+            <div class="mt-5 border-t border-gray-800 pt-5">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Darstellung</h3>
+                <div class="flex flex-col gap-3">
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" id="compact-mode-toggle" class="w-4 h-4 accent-[#9146FF] bg-gray-900 border-gray-600 rounded">
+                        <span class="text-sm text-gray-300 group-hover:text-white transition">Kompakt-Modus</span>
+                    </label>
+                    <label class="flex items-center gap-3 cursor-pointer group">
+                        <input type="checkbox" id="ultra-compact-mode-toggle" class="w-4 h-4 accent-[#9146FF] bg-gray-900 border-gray-600 rounded">
+                        <span class="text-sm text-gray-300 group-hover:text-white transition flex flex-col">
+                            Ultra-Kompakt Modus
+                            <span class="text-[10px] text-gray-500">Extreme Dichte (wie Kontaktliste)</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="mt-5 border-t border-gray-800 pt-5">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Push-Benachrichtigungen</h3>
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-[#0e0e10] border border-gray-800 p-2.5 rounded-lg gap-2">
+                    <span class="text-xs text-gray-400" id="notification-status">Prüfe Rechte...</span>
+                    <button onclick="requestNotifications()" class="w-full sm:w-auto bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md text-xs transition border border-gray-700">Aktivieren</button>
+                </div>
+            </div>
+
+            <!-- Backup Section -->
+            <div class="mt-5 border-t border-gray-800 pt-5">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Daten-Backup</h3>
+                <div class="flex gap-2">
+                    <button onclick="exportStreamers()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs transition border border-gray-700 flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                        Export
+                    </button>
+                    <button onclick="document.getElementById('import-file').click()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-xs transition border border-gray-700 flex items-center justify-center gap-1.5">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Import
+                    </button>
+                    <input type="file" id="import-file" class="hidden" accept=".json" onchange="importStreamers(event)">
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end gap-3 sticky -bottom-5 sm:static bg-[#18181b] pt-4 pb-2 border-t border-gray-800 sm:border-0 sm:pt-0 sm:pb-0 z-10">
+                <button onclick="toggleSettings()" class="px-4 py-2.5 rounded-lg text-xs text-gray-400 hover:text-white transition">Abbrechen</button>
+                <button onclick="saveSettings()" class="bg-[#bf94ff] hover:bg-[#9146FF] text-black px-6 py-2.5 rounded-lg font-bold text-sm transition shadow-lg">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // --- State Management ---
+        let credentials = { clientId: '', token: '' };
+        let streamers = [];
+        let appSettings = { compactMode: false, ultraCompactMode: true };
+        let chatSocket = null;
+        let previousStates = {};
+        let isFirstLoad = true;
+        let autoRefreshInterval = null;
+        let deferredPrompt = null;
+        let clipsCache = {}; 
+        
+        // --- Initialization ---
+        window.onload = () => {
+            initPWA();
+            loadStorage();
+            updateNotificationStatus();
+            
+            if (!credentials.clientId || !credentials.token) {
+                showToast('Bitte richte zuerst die API Einstellungen ein.', 'warning');
+                toggleSettings();
+            } else {
+                refreshData();
+                // 20 Minuten = 1.200.000 ms
+                autoRefreshInterval = setInterval(refreshData, 1200000);
+            }
+        };
+
+        function loadStorage() {
+            try {
+                const storedCreds = localStorage.getItem('twitch_creds');
+                if (storedCreds) credentials = JSON.parse(storedCreds);
+                
+                const storedStreamers = localStorage.getItem('twitch_streamers');
+                if (storedStreamers) streamers = JSON.parse(storedStreamers);
+                
+                const storedSettings = localStorage.getItem('twitch_settings');
+                if (storedSettings) appSettings = { ...appSettings, ...JSON.parse(storedSettings) };
+            } catch (e) {
+                console.error("Storage Error", e);
+            }
+            
+            document.getElementById('client-id-input').value = credentials.clientId || '';
+            document.getElementById('oauth-token-input').value = credentials.token || '';
+            document.getElementById('compact-mode-toggle').checked = appSettings.compactMode;
+            document.getElementById('ultra-compact-mode-toggle').checked = appSettings.ultraCompactMode;
+        }
+
+        function saveStorage() {
+            try {
+                localStorage.setItem('twitch_creds', JSON.stringify(credentials));
+                localStorage.setItem('twitch_streamers', JSON.stringify(streamers));
+                localStorage.setItem('twitch_settings', JSON.stringify(appSettings));
+            } catch (e) {
+                showToast("Speichern fehlgeschlagen.", "error");
+            }
+        }
+
+        // --- Settings / UI Actions ---
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveSettings() {
+            const clientId = document.getElementById('client-id-input').value.trim();
+            const token = document.getElementById('oauth-token-input').value.trim();
+            
+            if (!clientId || !token) {
+                showToast('API Felder müssen ausgefüllt sein.', 'error');
+                return;
+            }
+
+            credentials = { clientId, token };
+            appSettings.compactMode = document.getElementById('compact-mode-toggle').checked;
+            appSettings.ultraCompactMode = document.getElementById('ultra-compact-mode-toggle').checked;
+            
+            saveStorage();
+            toggleSettings();
+            showToast('Einstellungen gespeichert.', 'success');
+            refreshData();
+            
+            if(!autoRefreshInterval) autoRefreshInterval = setInterval(refreshData, 1200000);
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let colors = 'bg-[#18181b] border-gray-800 text-gray-200';
+            if (type === 'error') colors = 'bg-red-950/80 border-red-900 text-red-200';
+            else if (type === 'success') colors = 'bg-green-950/80 border-green-900 text-green-200';
+            else if (type === 'warning') colors = 'bg-yellow-950/80 border-yellow-900 text-yellow-200';
+
+            toast.className = `${colors} border px-4 py-2.5 rounded-lg shadow-xl toast-enter flex items-center gap-2 backdrop-blur-sm pointer-events-auto`;
+            toast.innerHTML = `<span class="text-xs font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-enter-active');
+            });
+
+            setTimeout(() => {
+                toast.classList.remove('toast-enter-active');
+                toast.classList.add('toast-exit-active');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // --- Notifications ---
+        function requestNotifications() {
+            if (!("Notification" in window)) {
+                showToast("Push-Benachrichtigungen nicht unterstützt.", "error");
+                return;
+            }
+            Notification.requestPermission().then(permission => {
+                updateNotificationStatus();
+                if (permission === "granted") showToast("Push aktiviert!", "success");
+            });
+        }
+
+        function updateNotificationStatus() {
+            const el = document.getElementById('notification-status');
+            if (!("Notification" in window)) el.textContent = "Nicht unterstützt";
+            else if (Notification.permission === "granted") { el.textContent = "Aktiviert"; el.classList.add("text-green-400"); }
+            else if (Notification.permission === "denied") { el.textContent = "Blockiert"; el.classList.add("text-red-400"); }
+            else el.textContent = "Nicht angefragt";
+        }
+
+        function sendNotification(title, body) {
+            if (!("Notification" in window) || Notification.permission !== "granted") return;
+            try { new Notification(title, { body: body, icon: 'https://placehold.co/100/9146FF/FFF?text=Live' }); } 
+            catch (e) { console.warn("Notification error:", e); }
+        }
+
+        // --- Streamer Data ---
+        function addStreamer(e) {
+            e.preventDefault();
+            const input = document.getElementById('streamer-input');
+            const name = input.value.trim().toLowerCase();
+            if (!name) return;
+            if (streamers.includes(name)) { showToast('Bereits vorhanden.', 'warning'); return; }
+
+            streamers.push(name);
+            saveStorage();
+            input.value = '';
+            showToast(`${name} hinzugefügt.`, 'success');
+            refreshData();
+        }
+
+        function removeStreamer(name) {
+            streamers = streamers.filter(s => s !== name);
+            saveStorage();
+            showToast(`${name} entfernt.`, 'info');
+            refreshData();
+        }
+
+        function exportStreamers() {
+            if (streamers.length === 0) return showToast('Liste ist leer.', 'warning');
+            const blob = new Blob([JSON.stringify(streamers, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = 'twitch_tracker_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Exportiert!', 'success');
+        }
+
+        function importStreamers(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) {
+                        const valid = data.filter(n => typeof n === 'string').map(n => n.trim().toLowerCase());
+                        streamers = [...new Set([...streamers, ...valid])];
+                        saveStorage();
+                        showToast(`Import erfolgreich!`, 'success');
+                        refreshData();
+                    }
+                } catch (err) { showToast('Format-Fehler.', 'error'); }
+                event.target.value = '';
+            };
+            reader.readAsText(file);
+        }
+
+        // --- API Logic ---
+        async function twitchFetch(endpoint) {
+            const res = await fetch(`https://api.twitch.tv/helix/${endpoint}`, {
+                headers: { 'Client-ID': credentials.clientId, 'Authorization': `Bearer ${credentials.token}` }
+            });
+            if (res.status === 401) throw new Error("401");
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            return res.json();
+        }
+
+        async function refreshData() {
+            if (!credentials.clientId || !credentials.token) return;
+            if (streamers.length === 0) return updateUI([], []);
+
+            try {
+                const loginQuery = streamers.map(s => `login=${encodeURIComponent(s)}`).join('&');
+                const usersRes = await twitchFetch(`users?${loginQuery}`);
+                const users = usersRes.data;
+
+                const idQuery = users.map(u => `user_id=${u.id}`).join('&');
+                let streams = [];
+                if (idQuery) {
+                    const streamsRes = await twitchFetch(`streams?${idQuery}`);
+                    streams = streamsRes.data;
+                }
+
+                const onlineList = [];
+                const offlineList = [];
+
+                users.forEach(user => {
+                    const stream = streams.find(s => s.user_id === user.id);
+                    if (stream) onlineList.push({ user, stream });
+                    else offlineList.push(user);
+                });
+
+                const foundLogins = users.map(u => u.login.toLowerCase());
+                streamers.forEach(s => {
+                    if (!foundLogins.includes(s)) offlineList.push({ login: s, display_name: s, id: null, notFound: true });
+                });
+
+                // Notifications
+                const currentStates = {};
+                onlineList.forEach(item => {
+                    currentStates[item.user.login] = true;
+                    if (!isFirstLoad && previousStates[item.user.login] === false) {
+                        sendNotification(`🔴 ${item.user.display_name} ist LIVE!`, item.stream.title);
+                    }
+                });
+                offlineList.forEach(user => {
+                    currentStates[user.login] = false;
+                });
+                
+                // Sort by Viewers
+                onlineList.sort((a, b) => b.stream.viewer_count - a.stream.viewer_count);
+
+                previousStates = currentStates;
+                isFirstLoad = false;
+
+                updateUI(onlineList, offlineList);
+
+            } catch (err) {
+                if (err.message === "401") showToast("Zugriff verweigert. Token abgelaufen?", "error");
+                else console.error(err);
+            }
+        }
+
+        // --- UI Rendering ---
+        function updateUI(online, offline) {
+            const onContainer = document.getElementById('online-list');
+            const offContainer = document.getElementById('offline-list');
+            
+            document.getElementById('online-count').textContent = `(${online.length})`;
+            document.getElementById('offline-count').textContent = `(${offline.length})`;
+
+            onContainer.innerHTML = ''; offContainer.innerHTML = '';
+            
+            // Handle Grid Layouts based on modes
+            const isUltra = appSettings.ultraCompactMode;
+            const isCompact = appSettings.compactMode && !isUltra;
+            
+            if (isUltra) {
+                onContainer.className = "flex flex-col gap-0 border border-gray-800 rounded-lg overflow-hidden bg-[#18181b]";
+                offContainer.className = "flex flex-col gap-0 border border-gray-800 rounded-lg overflow-hidden bg-[#18181b]";
+                document.getElementById('add-section').classList.add('hidden'); // Hide add bar in ultra mode to save space (optional, decided to keep it, so remove hidden if wanted. Actually let's just make padding smaller).
+                document.getElementById('add-section').className = "bg-[#18181b] p-2 border-b border-gray-800";
+            } else if (isCompact) {
+                onContainer.className = "flex flex-col gap-2";
+                offContainer.className = "grid grid-cols-1 md:grid-cols-2 gap-2";
+                document.getElementById('add-section').className = "bg-[#18181b] p-3 sm:p-4 rounded-xl border border-gray-800 shadow-sm";
+            } else {
+                onContainer.className = "flex flex-col gap-4";
+                offContainer.className = "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4";
+                document.getElementById('add-section').className = "bg-[#18181b] p-3 sm:p-4 rounded-xl border border-gray-800 shadow-sm";
+            }
+
+            if (chatSocket) { chatSocket.close(); chatSocket = null; }
+
+            if (online.length === 0) onContainer.innerHTML = '<p class="text-gray-600 text-xs italic p-2">Keiner online.</p>';
+            else {
+                online.forEach(data => onContainer.appendChild(createCard(data, true, isUltra, isCompact)));
+                initChatWebsocket(online.map(d => d.user.login));
+                fetchClips(online.map(d=>d.user), true);
+            }
+
+            if (offline.length === 0) offContainer.innerHTML = '<p class="text-gray-600 text-xs italic p-2">Keiner offline.</p>';
+            else {
+                offline.forEach(user => offContainer.appendChild(createCard({user}, false, isUltra, isCompact)));
+                fetchLastOnline(offline);
+                fetchSchedule(offline);
+                fetchClips(offline, false);
+            }
+        }
+
+        function createCard(data, isLive, isUltra, isCompact) {
+            const user = data.user;
+            const stream = data.stream;
+            const profileImg = user.profile_image_url || 'https://placehold.co/100/1f2937/6b7280?text=?';
+            
+            const div = document.createElement(isUltra ? 'details' : 'div');
+            if (isUltra) div.className = "group border-b border-gray-800/50 last:border-0 hover:bg-gray-800/30 transition text-gray-300";
+            else if (isCompact) div.className = "bg-[#18181b] border border-gray-800 rounded-lg overflow-hidden flex flex-col";
+            else div.className = "bg-[#18181b] border border-gray-800 rounded-xl overflow-hidden flex flex-col shadow-sm";
+
+            // Live Specific Data
+            let liveStatusHtml = '';
+            let uptimeText = '';
+            let viewerHtml = '';
+            if (isLive) {
+                const diffMins = Math.floor((new Date() - new Date(stream.started_at)) / 60000);
+                const h = Math.floor(diffMins/60); const m = diffMins%60;
+                uptimeText = h > 0 ? `${h}h ${m}m` : `${m}m`;
+                const vCount = new Intl.NumberFormat('de-DE').format(stream.viewer_count);
+                viewerHtml = `<span class="text-red-400 font-bold flex items-center gap-1 ${isUltra ? 'text-[10px]' : 'text-xs'}"><svg class="${isUltra ? 'w-2.5 h-2.5' : 'w-3 h-3'}" fill="currentColor" viewBox="0 0 20 20"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z"/><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd"/></svg>${vCount}</span>`;
+            }
+
+            // --- ULTRA COMPACT MODE ---
+            if (isUltra) {
+                div.innerHTML = `
+                    <summary class="flex items-center gap-2 p-1.5 cursor-pointer list-none select-none">
+                        ${isLive ? '<span class="w-1.5 h-1.5 bg-green-500 rounded-full shrink-0 shadow-[0_0_4px_#22c55e]"></span>' : '<span class="w-1.5 h-1.5 bg-gray-700 rounded-full shrink-0"></span>'}
+                        <img src="${profileImg}" class="w-6 h-6 rounded-full shrink-0 ${!isLive ? 'grayscale opacity-50' : ''}">
+                        <div class="flex-1 min-w-0 flex items-center gap-2">
+                            <span class="font-bold text-xs truncate ${isLive ? 'text-white' : 'text-gray-400'} min-w-[70px]">${user.display_name}</span>
+                            ${isLive ? `<span class="text-[9px] text-[#bf94ff] uppercase truncate max-w-[80px] shrink-0 font-semibold">${stream.game_name}</span>` : ''}
+                            ${!isLive && !user.notFound ? `<span class="text-[9px] text-gray-600 truncate hidden sm:block" id="last-online-${user.id}">...</span>` : ''}
+                            ${user.notFound ? '<span class="text-[9px] text-red-500">Not found</span>' : ''}
+                        </div>
+                        ${isLive ? viewerHtml : ''}
+                        <button onclick="removeStreamer('${user.login}')" class="text-gray-600 hover:text-red-400 px-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                    </summary>
+                    <div class="px-2 pb-2 bg-[#0e0e10] border-t border-gray-800/50">
+                        ${getAccordions(user, isLive, true)}
+                    </div>
+                `;
+                return div;
+            }
+
+            // --- STANDARD & COMPACT MODE ---
+            const headerClasses = isCompact ? "p-2.5 flex items-center gap-3 border-b border-gray-800" : "p-4 flex flex-col gap-3 border-b border-gray-800";
+            const imgClasses = isCompact ? "w-10 h-10" : "w-14 h-14 border-2 border-[#bf94ff]";
+            
+            div.innerHTML = `
+                <div class="${headerClasses}">
+                    ${isCompact ? '' : `<div class="flex gap-4 items-start">`}
+                    <img src="${profileImg}" class="${imgClasses} rounded-full shrink-0 ${!isLive ? 'grayscale opacity-60 border-gray-600' : ''}">
+                    
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <div class="flex items-center gap-2">
+                            ${isLive && isCompact ? '<span class="w-2 h-2 bg-green-500 rounded-full shrink-0 shadow-[0_0_5px_#22c55e]"></span>' : ''}
+                            ${!isLive && isCompact ? '<span class="w-2 h-2 bg-gray-600 rounded-full shrink-0"></span>' : ''}
+                            <a href="https://twitch.tv/${user.login}" target="_blank" class="font-bold text-sm sm:text-base ${isLive ? 'text-white' : 'text-gray-300'} hover:text-[#bf94ff] truncate">${user.display_name}</a>
+                            ${isLive && isCompact ? `<span class="text-[10px] text-gray-400 ml-2 shrink-0">${uptimeText}</span>` : ''}
+                            ${isLive && isCompact ? `<div class="ml-auto">${viewerHtml}</div>` : ''}
+                        </div>
+                        ${isLive && !isCompact ? `<p class="text-[11px] font-bold text-[#bf94ff] uppercase mt-0.5">${stream.game_name}</p><p class="text-xs text-gray-300 mt-1 truncate">${stream.title}</p>` : ''}
+                        ${!isLive && !user.notFound ? `
+                            <div class="flex items-center gap-3 text-[10px] text-gray-500 mt-0.5">
+                                <span class="truncate" id="last-online-${user.id}">Wird geladen...</span>
+                                <span class="truncate hidden sm:block" id="schedule-${user.id}"></span>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    ${isCompact ? `<button onclick="removeStreamer('${user.login}')" class="text-gray-600 hover:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>` : ''}
+                    ${isCompact ? '' : `</div>`}
+                    
+                    ${isLive && !isCompact ? `
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="bg-gray-800 px-2 py-1 rounded text-[11px] text-gray-300 flex items-center gap-1"><svg class="w-3 h-3 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>${uptimeText}</span>
+                        <span class="bg-gray-800 px-2 py-1 rounded text-[11px]">${viewerHtml}</span>
+                        <button onclick="removeStreamer('${user.login}')" class="ml-auto text-gray-500 hover:text-red-400 bg-gray-800 p-1.5 rounded transition"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    </div>` : ''}
+                    
+                    ${!isLive && !isCompact && !user.notFound ? `
+                    <button onclick="removeStreamer('${user.login}')" class="absolute top-3 right-3 text-gray-600 hover:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    ` : ''}
+                </div>
+                ${!user.notFound ? `<div class="bg-[#0e0e10]/50">${getAccordions(user, isLive, false)}</div>` : ''}
+            `;
+            return div;
+        }
+
+        function getAccordions(user, isLive, isUltra) {
+            const sumClass = `flex justify-between items-center cursor-pointer px-3 ${isUltra ? 'py-1.5 text-[10px] min-h-[28px]' : 'py-2.5 text-xs min-h-[40px]'} text-gray-400 hover:text-white transition hover:bg-gray-800/50`;
+            const iconSize = isUltra ? 'w-3 h-3' : 'w-4 h-4';
+            let html = `<div class="divide-y divide-gray-800">`;
+
+            if (isLive) {
+                html += `
+                <details class="group">
+                    <summary class="${sumClass}"><span class="flex items-center gap-1.5"><svg class="${iconSize}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>Stream</span><span class="group-open:rotate-180 transition">▼</span></summary>
+                    <div class="p-2" id="stream-embed-${user.login}">
+                        <button onclick="loadStream('${user.login}')" class="w-full bg-[#bf94ff] text-black text-xs font-bold py-2 rounded-lg">Stream laden</button>
+                    </div>
+                </details>
+                <details class="group">
+                    <summary class="${sumClass}"><span class="flex items-center gap-1.5"><svg class="${iconSize}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>Live Chat</span><span class="group-open:rotate-180 transition">▼</span></summary>
+                    <div class="p-2 pt-0"><div id="chat-${user.login}" class="bg-[#0e0e10] p-2 rounded max-h-40 overflow-y-auto text-[11px] text-gray-500 border border-gray-800">Verbinde...</div></div>
+                </details>
+                `;
+            }
+
+            html += `
+                <details class="group" ontoggle="if(this.open) renderClips('${user.id}', '${user.login}', ${isUltra})">
+                    <summary class="${sumClass}"><span class="flex items-center gap-1.5"><svg class="${iconSize}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"/></svg>Clips</span><span class="group-open:rotate-180 transition">▼</span></summary>
+                    <div class="p-2 pt-0" id="clips-${user.login}">Lade Clips...</div>
+                </details>
+            </div>`;
+            return html;
+        }
+
+        // --- Data Fetchers for Info ---
+        async function fetchLastOnline(offline) {
+            for(const u of offline) {
+                if(!u.id) continue;
+                const el = document.getElementById(`last-online-${u.id}`);
+                if(!el) continue;
+                try {
+                    const res = await twitchFetch(`videos?user_id=${u.id}&type=archive&first=1`);
+                    if(res.data.length > 0) {
+                        const d = new Date(res.data[0].created_at);
+                        el.textContent = `Zuletzt: ${d.toLocaleDateString('de-DE')} ${d.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})}`;
+                    } else el.textContent = "Kein VOD";
+                } catch(e) { el.textContent = "Fehler"; }
+            }
+        }
+
+        async function fetchSchedule(offline) {
+            for(const u of offline) {
+                if(!u.id) continue;
+                const el = document.getElementById(`schedule-${u.id}`);
+                if(!el) continue;
+                try {
+                    const res = await twitchFetch(`schedule?broadcaster_id=${u.id}`);
+                    if(res.data?.segments?.length > 0) {
+                        const d = new Date(res.data.segments[0].start_time);
+                        el.textContent = `| Nächster: ${d.toLocaleDateString('de-DE', {weekday:'short'})} ${d.toLocaleTimeString('de-DE', {hour:'2-digit', minute:'2-digit'})}`;
+                        el.classList.add("text-[#bf94ff]");
+                    } else el.textContent = "";
+                } catch(e) { el.textContent = ""; }
+            }
+        }
+
+        async function fetchClips(users, isLive) {
+            const date = new Date(); date.setDate(date.getDate() - 7);
+            const start = date.toISOString();
+            for(const u of users) {
+                if(!u.id) continue;
+                try {
+                    const res = await twitchFetch(`clips?broadcaster_id=${u.id}&first=15&started_at=${start}`);
+                    clipsCache[u.id] = res.data.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).slice(0,3);
+                } catch(e) {}
+            }
+        }
+
+        function renderClips(id, login, isUltra) {
+            const container = document.getElementById(`clips-${login}`);
+            if(!container) return;
+            const clips = clipsCache[id];
+            if(!clips || clips.length===0) { container.innerHTML="<span class='text-xs text-gray-600'>Keine Clips der letzten 7 Tage.</span>"; return; }
+            
+            const host = window.location.hostname || 'localhost';
+            container.innerHTML = `<div class="grid grid-cols-1 sm:grid-cols-3 gap-2">` + 
+                clips.map(c => `
+                    <div class="bg-[#18181b] border border-gray-800 rounded p-1">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[9px] text-gray-300 truncate w-3/4">${c.title}</span>
+                            <span class="text-[8px] text-gray-500">${c.view_count} views</span>
+                        </div>
+                        <iframe src="${c.embed_url}&parent=${host}&autoplay=false" class="w-full aspect-video border-0 rounded-sm"></iframe>
+                    </div>
+                `).join('') + `</div>`;
+        }
+
+        function loadStream(login) {
+            const host = window.location.hostname || 'localhost';
+            document.getElementById(`stream-embed-${login}`).innerHTML = `<iframe src="https://player.twitch.tv/?channel=${login}&parent=${host}&autoplay=true" class="w-full aspect-video border-0 rounded"></iframe>`;
+        }
+
+        // --- IRC WebSockets ---
+        function initChatWebsocket(channels) {
+            if (channels.length === 0) return;
+            chatSocket = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
+            chatSocket.onopen = () => {
+                chatSocket.send('NICK justinfan12345');
+                channels.forEach(ch => {
+                    chatSocket.send(`JOIN #${ch}`);
+                    const c = document.getElementById(`chat-${ch}`);
+                    if(c) c.innerHTML = '';
+                });
+            };
+            chatSocket.onmessage = (e) => {
+                e.data.split('\r\n').forEach(msg => {
+                    if (!msg) return;
+                    if (msg.startsWith('PING')) { chatSocket.send('PONG :tmi.twitch.tv'); return; }
+                    const match = msg.match(/^:([^!]+)!.* PRIVMSG #([^ ]+) :(.+)$/);
+                    if (match) appendChat(match[2], match[1], match[3]);
+                });
+            };
+        }
+
+        function appendChat(channel, user, text) {
+            const container = document.getElementById(`chat-${channel}`);
+            if (!container) return;
+            const line = document.createElement('div');
+            line.className = "mb-1 leading-tight break-words";
+            // Escape HTML
+            const safeUser = user.replace(/</g, "&lt;");
+            const safeText = text.replace(/</g, "&lt;");
+            line.innerHTML = `<span class="font-bold text-[#bf94ff]">${safeUser}:</span> <span class="text-gray-300">${safeText}</span>`;
+            container.appendChild(line);
+            while (container.children.length > 20) container.removeChild(container.firstChild);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // --- PWA Support ---
+        function initPWA() {
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#9146FF"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>`;
+            const manifest = {
+                name: "Twitch Tracker", short_name: "Tracker", display: "standalone", start_url: ".",
+                theme_color: "#18181b", background_color: "#0e0e10",
+                icons: [{ src: "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg), sizes: "512x512", type: "image/svg+xml" }]
+            };
+            document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="data:application/manifest+json,${encodeURIComponent(JSON.stringify(manifest))}">`);
+            
+            const sw = "self.addEventListener('fetch', (e) => {});";
+            if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw], {type: 'application/javascript'}))).catch(()=>{});
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault(); deferredPrompt = e;
+                const btn = document.getElementById('install-btn');
+                btn.classList.remove('hidden'); btn.classList.add('flex');
+            });
+        }
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((res) => {
+                    if (res.outcome === 'accepted') showToast('App wird installiert.', 'success');
+                    deferredPrompt = null;
+                    document.getElementById('install-btn').classList.add('hidden');
+                });
+            }
+        }
+    </script>
+</body>
+</html>
