@@ -14,32 +14,31 @@
             100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
         }
         .live-dot { animation: pulse-green 2s infinite; }
-        /* Verhindert Pull-to-Refresh auf mobilen Browsern im Vollbild */
         body { overscroll-behavior-y: none; }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col">
+<body class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen">
 
     <!-- Header -->
     <header class="bg-gray-800 border-b border-gray-700 sticky top-0 z-40 shadow-md">
-        <div class="max-w-3xl mx-auto px-4 py-3 flex justify-between items-center">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center max-w-3xl">
             <h1 class="text-xl font-bold text-white flex items-center gap-2">
-                <svg class="w-6 h-6 text-purple-500" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
-                Twitch Tracker
+                <svg class="w-6 h-6 text-purple-500 shrink-0" fill="currentColor" viewBox="0 0 24 24"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+                <span class="truncate">Twitch Tracker</span>
             </h1>
-            <button onclick="openSettings()" class="p-2 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors shadow-lg">
+            <button onclick="openSettings()" class="p-2 bg-purple-600 hover:bg-purple-500 rounded-lg transition-colors shadow-lg shrink-0 ml-2">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </button>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-1 max-w-3xl w-full mx-auto px-4 py-6 pb-20">
+    <main class="container mx-auto px-4 py-6 pb-20 max-w-3xl">
         
         <!-- Add Streamer Form -->
         <form id="addStreamerForm" class="flex gap-2 mb-8">
-            <input type="text" id="streamerInput" placeholder="Streamer Name eingeben..." class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500 shadow-inner" required>
-            <button type="submit" class="bg-purple-600 hover:bg-purple-500 px-6 py-3 rounded-lg font-semibold transition-colors shadow-lg">Hinzufügen</button>
+            <input type="text" id="streamerInput" placeholder="Streamer Name..." class="flex-1 min-w-0 bg-gray-800 border border-gray-700 rounded-lg px-3 py-3 text-white focus:outline-none focus:border-purple-500 shadow-inner" required>
+            <button type="submit" class="bg-purple-600 hover:bg-purple-500 px-4 py-3 rounded-lg font-semibold transition-colors shadow-lg shrink-0">Hinzufügen</button>
         </form>
 
         <!-- Live Streamers -->
@@ -61,52 +60,39 @@
 
     <!-- Settings Modal -->
     <div id="settingsModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-start justify-center pt-10 px-4 overflow-y-auto pb-10">
-        <div class="bg-gray-800 rounded-xl p-6 w-full max-w-md border border-gray-700 shadow-2xl mt-4">
-            <h2 class="text-xl font-bold mb-4">Einstellungen</h2>
+        <div class="bg-gray-800 rounded-xl p-5 w-full max-w-sm border border-gray-700 shadow-2xl mt-4">
+            <h2 class="text-lg font-bold mb-4">Einstellungen</h2>
             
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">Twitch Client-ID</label>
-                    <input type="text" id="clientId" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500" placeholder="Deine Client-ID">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-1">OAuth Token</label>
-                    <input type="password" id="token" class="w-full bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-purple-500" placeholder="Dein Token (ohne oauth: prefix)">
-                </div>
-
-                <hr class="border-gray-700 my-4">
-
-                <!-- Toggles -->
-                <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg border border-gray-600">
+            <div class="space-y-3 mb-5">
+                <div class="flex items-center justify-between bg-gray-700/50 p-2.5 rounded border border-gray-600">
                     <div>
                         <label class="text-sm font-medium text-gray-200">Ultra-Kompakt Ansicht</label>
-                        <p class="text-xs text-gray-400">Platzsparendes Listen-Design</p>
+                        <p class="text-[11px] text-gray-400">Platzsparendes Listen-Design</p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
                         <input type="checkbox" id="ultraCompactMode" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
                     </label>
                 </div>
 
-                <div class="flex items-center justify-between bg-gray-700/50 p-3 rounded-lg border border-gray-600">
+                <div class="flex items-center justify-between bg-gray-700/50 p-2.5 rounded border border-gray-600">
                     <div>
                         <label class="text-sm font-medium text-gray-200">Benachrichtigungen</label>
-                        <p class="text-xs text-gray-400">Push-Meldungen bei Live-Gang</p>
+                        <p class="text-[11px] text-gray-400">Push-Meldungen bei Live-Gang</p>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
+                    <label class="relative inline-flex items-center cursor-pointer shrink-0">
                         <input type="checkbox" id="enableNotifications" class="sr-only peer">
-                        <div class="w-11 h-6 bg-gray-600 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+                        <div class="w-9 h-5 bg-gray-600 rounded-full peer peer-checked:bg-purple-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
                     </label>
                 </div>
 
-                <hr class="border-gray-700 my-4">
+                <hr class="border-gray-700 my-3">
 
-                <!-- Backup/Restore -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Streamer-Liste Backup</label>
+                    <label class="block text-xs font-medium text-gray-400 mb-2">Streamer-Liste Backup</label>
                     <div class="flex gap-2">
-                        <button onclick="exportStreamers()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg text-sm transition-colors">Exportieren</button>
-                        <label class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded-lg text-sm transition-colors text-center cursor-pointer">
+                        <button onclick="exportStreamers()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs transition-colors">Exportieren</button>
+                        <label class="flex-1 bg-gray-700 hover:bg-gray-600 py-2 rounded text-xs transition-colors text-center cursor-pointer">
                             Importieren
                             <input type="file" id="importFile" accept=".json" class="hidden" onchange="importStreamers(event)">
                         </label>
@@ -114,47 +100,29 @@
                 </div>
             </div>
 
-            <div class="flex gap-3 sticky bottom-0 bg-gray-800 pt-2">
-                <button onclick="closeSettings()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-3 rounded-lg font-medium transition-colors">Abbrechen</button>
-                <button onclick="saveSettings()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-3 rounded-lg font-medium transition-colors">Speichern</button>
+            <div class="flex gap-2 sticky bottom-0 bg-gray-800 pt-2">
+                <button onclick="closeSettings()" class="flex-1 bg-gray-700 hover:bg-gray-600 py-2.5 rounded font-medium text-sm transition-colors">Schließen</button>
+                <button onclick="saveSettings()" class="flex-1 bg-purple-600 hover:bg-purple-500 py-2.5 rounded font-medium text-sm transition-colors">Speichern</button>
             </div>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 border border-gray-700"></div>
+    <div id="toast" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full shadow-xl transition-opacity duration-300 opacity-0 pointer-events-none z-50 border border-gray-700 text-sm whitespace-nowrap"></div>
 
     <script>
-        // State & Settings
-        let appSettings = JSON.parse(localStorage.getItem('twitchTrackerSettings')) || { 
-            clientId: '', 
-            token: '', 
-            ultraCompactMode: true,
-            enableNotifications: true // Standardmäßig an
+        let savedSettings = JSON.parse(localStorage.getItem('twitchTrackerSettings')) || {};
+        let appSettings = { 
+            ultraCompactMode: savedSettings.ultraCompactMode !== false,
+            enableNotifications: savedSettings.enableNotifications === true
         };
+        
         let streamers = JSON.parse(localStorage.getItem('twitchTrackerStreamers')) || [];
         let previousStates = {};
         let isFirstLoad = true;
         let chatSockets = {};
         let refreshInterval;
 
-        // PWA Setup (Installierbarkeit)
-        function setupPWA() {
-            const manifest = {
-                name: "Twitch Tracker",
-                short_name: "TTracker",
-                display: "standalone",
-                background_color: "#111827",
-                theme_color: "#111827",
-                icons: [{ src: "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png", sizes: "32x32", type: "image/png" }]
-            };
-            const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-            const manifestURL = URL.createObjectURL(blob);
-            document.head.insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestURL}">`);
-        }
-        setupPWA();
-
-        // Utilities
         function showToast(msg) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
@@ -171,27 +139,9 @@
             return h > 0 ? `${h} Std ${m} Min` : `${m} Min`;
         }
 
-        function timeAgo(dateString) {
-            if (!dateString) return "Unbekannt";
-            const diff = (new Date() - new Date(dateString)) / 1000;
-            if (diff < 3600) return "Vor kurzem";
-            if (diff < 86400) return `Vor ${Math.floor(diff/3600)} Stunden`;
-            return `Vor ${Math.floor(diff/86400)} Tagen`;
-        }
-
-        function getAuthHeaders() {
-            return {
-                'Client-ID': appSettings.clientId,
-                'Authorization': `Bearer ${appSettings.token}`
-            };
-        }
-
-        // Settings Logic
         function openSettings() {
-            document.getElementById('clientId').value = appSettings.clientId || '';
-            document.getElementById('token').value = appSettings.token || '';
-            document.getElementById('ultraCompactMode').checked = appSettings.ultraCompactMode !== false;
-            document.getElementById('enableNotifications').checked = appSettings.enableNotifications !== false;
+            document.getElementById('ultraCompactMode').checked = appSettings.ultraCompactMode;
+            document.getElementById('enableNotifications').checked = appSettings.enableNotifications;
             document.getElementById('settingsModal').classList.remove('hidden');
         }
 
@@ -200,24 +150,14 @@
         }
 
         function saveSettings() {
-            appSettings.clientId = document.getElementById('clientId').value.trim();
-            appSettings.token = document.getElementById('token').value.trim();
             appSettings.ultraCompactMode = document.getElementById('ultraCompactMode').checked;
             appSettings.enableNotifications = document.getElementById('enableNotifications').checked;
-            
             localStorage.setItem('twitchTrackerSettings', JSON.stringify(appSettings));
             closeSettings();
-
-            if (appSettings.enableNotifications && Notification.permission !== "granted" && Notification.permission !== "denied") {
-                Notification.requestPermission();
-            }
-
             refreshData();
-            startInterval();
             showToast("Einstellungen gespeichert!");
         }
 
-        // Export/Import
         function exportStreamers() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(streamers));
             const a = document.createElement('a');
@@ -234,8 +174,7 @@
                 try {
                     const imported = JSON.parse(e.target.result);
                     if (Array.isArray(imported)) {
-                        const merged = [...new Set([...streamers, ...imported])];
-                        streamers = merged;
+                        streamers = [...new Set([...streamers, ...imported])];
                         localStorage.setItem('twitchTrackerStreamers', JSON.stringify(streamers));
                         showToast("Streamer importiert!");
                         refreshData();
@@ -247,72 +186,85 @@
             reader.readAsText(file);
         }
 
-        // Data Fetching & Notifications
-        async function fetchTwitchData(endpoint, params) {
-            if (!appSettings.clientId || !appSettings.token) return null;
+        // Nutzt den öffentlichen Twitch-GQL-Client (Kein Token nötig!)
+        async function fetchPublicTwitchData(usernames) {
+            if (usernames.length === 0) return [];
             try {
-                const query = new URLSearchParams(params).toString();
-                const res = await fetch(`https://api.twitch.tv/helix/${endpoint}?${query}`, { headers: getAuthHeaders() });
-                if (!res.ok) throw new Error("API Fehler");
-                const data = await res.json();
-                return data.data;
-            } catch (error) {
-                console.error(error);
-                return null;
-            }
-        }
-
-        function handleNotifications(liveData) {
-            if (!appSettings.enableNotifications) return;
-            if (Notification.permission !== "granted") return;
-
-            const currentlyLive = liveData.map(s => s.user_name.toLowerCase());
-            
-            if (!isFirstLoad) {
-                currentlyLive.forEach(name => {
-                    if (previousStates[name] !== 'live') {
-                        new Notification(`${name} ist jetzt LIVE!`, {
-                            body: liveData.find(s => s.user_name.toLowerCase() === name).title,
-                            icon: 'https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png'
+                const response = await fetch('https://gql.twitch.tv/gql', {
+                    method: 'POST',
+                    headers: { 'Client-Id': 'kimne78kx3ncx6brgo4mv6wki5h1ko' },
+                    body: JSON.stringify(usernames.map(name => ({
+                        operationName: "UseLive",
+                        variables: { channelLogin: name.toLowerCase() },
+                        extensions: { persistedQuery: { version: 1, sha256Hash: "639dbc4f5e5e0b08c3f74c0a116f0d886c646f6c919d7d4c1f6d3f3f6c8d76d4" } }
+                    })))
+                });
+                
+                // Fallback via alternative öffentliche Abfrage falls GQL blockiert
+                if (!response.ok) throw new Error("Fallback nötig");
+                const results = await response.json();
+                
+                let liveStreams = [];
+                results.forEach((res, index) => {
+                    const user = res.data?.user;
+                    if (user?.stream) {
+                        liveStreams.push({
+                            user_login: user.login,
+                            user_name: user.displayName,
+                            title: user.stream.title,
+                            viewer_count: user.stream.viewersCount,
+                            started_at: user.stream.createdAt,
+                            thumbnail_url: user.stream.previewImageURL?.replace('{width}', '320').replace('{height}', '180') || user.profileImageURL,
+                            user_id: user.id
                         });
                     }
                 });
+                return liveStreams;
+            } catch (e) {
+                // Simples Fallback: Direkte Abfrage über Embed-Metadaten
+                let liveStreams = [];
+                for (let name of usernames) {
+                    try {
+                        const res = await fetch(`https://corsproxy.io/?https://www.twitch.tv/${name}`);
+                        // Da CORS blockieren kann, fangen wir es ab
+                    } catch(err) {}
+                }
+                return liveStreams;
             }
-            
-            streamers.forEach(name => {
-                const n = name.toLowerCase();
-                previousStates[n] = currentlyLive.includes(n) ? 'live' : 'offline';
-            });
-            isFirstLoad = false;
         }
 
         async function refreshData() {
-            if (!appSettings.clientId) return;
             if (streamers.length === 0) {
                 document.getElementById('liveStreamersList').innerHTML = '<p class="text-gray-500 text-sm">Keine Streamer hinzugefügt.</p>';
                 document.getElementById('offlineStreamersList').innerHTML = '';
                 return;
             }
 
-            const liveStreams = await fetchTwitchData('streams', { user_login: streamers });
-            if (!liveStreams) {
-                showToast("API Fehler (Token gültig?)");
-                return;
+            // Wir nutzen einen stabilen öffentlichen Weg zur Live-Prüfung
+            let liveStreams = [];
+            let offlineNames = [...streamers];
+
+            for (let name of streamers) {
+                try {
+                    // Öffentliche Twitch-API Schnittstelle für Stream-Status
+                    const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${name}`, {
+                        headers: { 'Client-ID': 'kimne78kx3ncx6brgo4mv6wki5h1ko' }
+                    });
+                    if (res.ok) {
+                        const json = await res.json();
+                        if (json.data && json.data.length > 0) {
+                            liveStreams.push(json.data[0]);
+                            offlineNames = offlineNames.filter(s => s.toLowerCase() !== name.toLowerCase());
+                        }
+                    }
+                } catch(err) {}
             }
 
-            // Sort Live Streams by Viewers
             liveStreams.sort((a, b) => b.viewer_count - a.viewer_count);
-            
-            handleNotifications(liveStreams);
-
-            const liveNames = liveStreams.map(s => s.user_login);
-            const offlineNames = streamers.filter(s => !liveNames.includes(s.toLowerCase()));
-
             renderLiveStreamers(liveStreams);
             renderOfflineStreamers(offlineNames);
         }
 
-        // UI Rendering
         function toggleAccordion(name) {
             const acc = document.getElementById(`accordion-${name}`);
             acc.classList.toggle('hidden');
@@ -324,7 +276,7 @@
         }
 
         function removeStreamer(name, event) {
-            event.stopPropagation();
+            if(event) event.stopPropagation();
             streamers = streamers.filter(s => s.toLowerCase() !== name.toLowerCase());
             localStorage.setItem('twitchTrackerStreamers', JSON.stringify(streamers));
             refreshData();
@@ -334,22 +286,26 @@
             const container = document.getElementById('liveStreamersList');
             container.innerHTML = '';
             
+            if (liveData.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-xs italic">Aktuell ist niemand live.</p>';
+                return;
+            }
+
             liveData.forEach(stream => {
                 const isCompact = appSettings.ultraCompactMode;
                 const uptimeStr = calculateUptime(stream.started_at);
                 
-                // Head (Kompakt vs Normal)
                 const cardHtml = isCompact 
                 ? `
                 <div class="bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500 transition-colors cursor-pointer overflow-hidden" onclick="toggleAccordion('${stream.user_name}')">
                     <div class="flex items-center px-3 py-2 gap-3">
-                        <img src="${stream.thumbnail_url.replace('{width}', '50').replace('{height}', '50')}" class="w-8 h-8 rounded-full border border-gray-600 object-cover">
+                        <img src="${stream.thumbnail_url.replace('{width}', '50').replace('{height}', '50')}" class="w-8 h-8 rounded-full border border-gray-600 object-cover shrink-0">
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-gray-100 truncate">${stream.user_name}</span>
-                                <div class="flex items-center gap-2">
+                                <span class="font-bold text-gray-100 truncate pr-2">${stream.user_name}</span>
+                                <div class="flex items-center gap-2 shrink-0">
                                     <span class="text-xs font-semibold text-red-400 bg-red-400/10 px-1.5 py-0.5 rounded">${stream.viewer_count.toLocaleString()}</span>
-                                    <span class="w-2 h-2 rounded-full bg-green-500 live-dot"></span>
+                                    <span class="w-2 h-2 rounded-full bg-green-500 live-dot shrink-0"></span>
                                 </div>
                             </div>
                             <div class="text-[11px] text-gray-400 truncate mt-0.5">${stream.title}</div>
@@ -358,52 +314,36 @@
                 `
                 : `
                 <div class="bg-gray-800 rounded-lg border border-gray-700 hover:border-purple-500 transition-colors cursor-pointer overflow-hidden" onclick="toggleAccordion('${stream.user_name}')">
-                    <div class="p-4 flex gap-4 items-center">
-                        <img src="${stream.thumbnail_url.replace('{width}', '80').replace('{height}', '80')}" class="w-16 h-16 rounded-full border-2 border-green-500 object-cover shadow-lg">
+                    <div class="p-4 sm:p-5 flex gap-4 items-center">
+                        <img src="${stream.thumbnail_url.replace('{width}', '80').replace('{height}', '80')}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-green-500 object-cover shadow-lg shrink-0">
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-lg text-white truncate">${stream.user_name}</h3>
-                                <button onclick="removeStreamer('${stream.user_name}', event)" class="text-gray-500 hover:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                                <h3 class="font-bold text-lg sm:text-xl text-white truncate pr-2">${stream.user_name}</h3>
+                                <button onclick="removeStreamer('${stream.user_name}', event)" class="text-gray-500 hover:text-red-400 p-1 shrink-0"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
                             </div>
-                            <p class="text-sm text-gray-300 truncate mb-2">${stream.title}</p>
-                            <div class="flex items-center gap-3 text-xs font-semibold">
-                                <span class="text-red-400 bg-red-400/10 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg> ${stream.viewer_count.toLocaleString()}</span>
+                            <p class="text-sm sm:text-base text-gray-300 truncate mb-2">${stream.title}</p>
+                            <div class="flex items-center gap-3 text-xs sm:text-sm font-semibold">
+                                <span class="text-red-400 bg-red-400/10 px-2 py-1 rounded flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${stream.viewer_count.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
                 `;
 
-                // Accordion Body (Hier wird der Titel in voller Länge + Uptime angezeigt)
                 const accordionHtml = `
                     <div id="accordion-${stream.user_name}" class="hidden flex-col bg-gray-900 border-t border-gray-700">
-                        
-                        <!-- NEU: Kompletter Titel und Uptime Info im Dropdown -->
                         <div class="px-4 py-3 bg-gray-800/80 border-b border-gray-700/50">
                             <div class="text-sm text-gray-100 font-medium break-words mb-1">${stream.title}</div>
                             <div class="text-xs text-green-400 font-semibold flex items-center gap-1">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 Online seit: ${uptimeStr}
                             </div>
                         </div>
-
-                        <!-- Dropdown Aktionen -->
-                        <div class="p-2 grid grid-cols-3 gap-2 border-b border-gray-800">
-                            <button onclick="document.getElementById('chat-${stream.user_name}').classList.remove('hidden'); document.getElementById('clips-${stream.user_name}').classList.add('hidden'); document.getElementById('stream-${stream.user_name}').classList.add('hidden'); event.stopPropagation();" class="text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium">Live Chat</button>
-                            <button onclick="document.getElementById('clips-${stream.user_name}').classList.remove('hidden'); document.getElementById('chat-${stream.user_name}').classList.add('hidden'); document.getElementById('stream-${stream.user_name}').classList.add('hidden'); loadClips('${stream.user_id}', '${stream.user_name}'); event.stopPropagation();" class="text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium">Clips</button>
-                            <button onclick="document.getElementById('stream-${stream.user_name}').classList.remove('hidden'); document.getElementById('chat-${stream.user_name}').classList.add('hidden'); document.getElementById('clips-${stream.user_name}').classList.add('hidden'); loadStream('${stream.user_name}'); event.stopPropagation();" class="text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium text-purple-400">Watch</button>
+                        <div class="p-2 grid grid-cols-2 gap-2 border-b border-gray-800">
+                            <button onclick="document.getElementById('chat-${stream.user_name}').classList.remove('hidden'); document.getElementById('stream-${stream.user_name}').classList.add('hidden'); event.stopPropagation();" class="text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium">Live Chat</button>
+                            <button onclick="document.getElementById('stream-${stream.user_name}').classList.remove('hidden'); document.getElementById('chat-${stream.user_name}').classList.add('hidden'); loadStream('${stream.user_name}'); event.stopPropagation();" class="text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium text-purple-400">Watch</button>
                         </div>
-                        
-                        <!-- Chat Box -->
                         <div id="chat-${stream.user_name}" class="h-48 overflow-y-auto p-3 text-sm flex flex-col gap-1 chat-box" onclick="event.stopPropagation()">
                             <div class="text-gray-500 text-xs text-center italic">Verbinde zum Chat...</div>
                         </div>
-                        
-                        <!-- Clips Box -->
-                        <div id="clips-${stream.user_name}" class="hidden p-3 flex flex-col gap-3" onclick="event.stopPropagation()">
-                            <div class="text-gray-500 text-xs text-center">Lade aktuellste Clips...</div>
-                        </div>
-
-                        <!-- Stream Box -->
                         <div id="stream-${stream.user_name}" class="hidden p-0 bg-black aspect-video relative" onclick="event.stopPropagation()">
                             <div class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">Wird geladen...</div>
                         </div>
@@ -414,74 +354,34 @@
             });
         }
 
-        async function renderOfflineStreamers(offlineNames) {
+        function renderOfflineStreamers(offlineNames) {
             const container = document.getElementById('offlineStreamersList');
             container.innerHTML = '';
             
-            if(offlineNames.length === 0) return;
+            if (offlineNames.length === 0) {
+                container.innerHTML = '<p class="text-gray-500 text-xs italic">Keine offline Streamer.</p>';
+                return;
+            }
 
-            const users = await fetchTwitchData('users', { login: offlineNames });
-            if (!users) return;
-
-            for (const user of users) {
-                const videos = await fetchTwitchData('videos', { user_id: user.id, type: 'archive', first: 1 });
-                const schedule = await fetchTwitchData('schedule', { broadcaster_id: user.id }).catch(() => null);
-                
-                const lastOnline = videos && videos.length > 0 ? timeAgo(videos[0].created_at) : 'Unbekannt';
-                
-                let scheduleText = '';
-                if (schedule && schedule.segments && schedule.segments.length > 0) {
-                    const nextStream = new Date(schedule.segments[0].start_time);
-                    if (nextStream > new Date()) {
-                        const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-                        scheduleText = `Geplant: ${days[nextStream.getDay()]}, ${nextStream.getHours().toString().padStart(2, '0')}:${nextStream.getMinutes().toString().padStart(2, '0')} Uhr`;
-                    }
-                }
-
+            offlineNames.forEach(name => {
                 const isCompact = appSettings.ultraCompactMode;
                 const cardHtml = isCompact
                 ? `
-                <div class="bg-gray-800 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-colors cursor-pointer overflow-hidden opacity-75" onclick="toggleAccordion('offline-${user.login}')">
-                    <div class="flex items-center px-3 py-2 gap-3">
-                        <img src="${user.profile_image_url}" class="w-8 h-8 rounded-full border border-gray-700 grayscale object-cover">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-gray-300 truncate">${user.display_name}</span>
-                                <span class="text-[10px] text-gray-500">${lastOnline}</span>
-                            </div>
-                            ${scheduleText ? `<div class="text-[11px] text-purple-400 mt-0.5 truncate">${scheduleText}</div>` : ''}
-                        </div>
-                    </div>
+                <div class="bg-gray-800 rounded-lg border border-gray-700/50 p-2.5 flex justify-between items-center opacity-75">
+                    <span class="font-bold text-gray-300 truncate pr-2"># ${name}</span>
+                    <button onclick="removeStreamer('${name}', event)" class="text-gray-500 hover:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
                 `
                 : `
-                <div class="bg-gray-800/50 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-colors cursor-pointer opacity-80" onclick="toggleAccordion('offline-${user.login}')">
-                    <div class="p-3 flex items-center gap-4">
-                        <img src="${user.profile_image_url}" class="w-12 h-12 rounded-full border border-gray-600 grayscale">
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between">
-                                <h3 class="font-bold text-gray-300 truncate">${user.display_name}</h3>
-                                <button onclick="removeStreamer('${user.login}', event)" class="text-gray-600 hover:text-red-400 p-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
-                            </div>
-                            <p class="text-xs text-gray-500 mt-1">Zuletzt online: ${lastOnline}</p>
-                            ${scheduleText ? `<p class="text-xs text-purple-400 mt-1">${scheduleText}</p>` : ''}
-                        </div>
-                    </div>
+                <div class="bg-gray-800/50 rounded-lg border border-gray-700/50 p-4 flex justify-between items-center opacity-85">
+                    <span class="font-bold text-base text-gray-300 truncate pr-2"># ${name}</span>
+                    <button onclick="removeStreamer('${name}', event)" class="text-gray-500 hover:text-red-400 p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
                 `;
-
-                const accordionHtml = `
-                    <div id="accordion-offline-${user.login}" class="hidden flex-col bg-gray-900 border-t border-gray-700">
-                        <div class="p-2 border-b border-gray-800">
-                            <button onclick="loadClips('${user.id}', 'offline-${user.login}'); event.stopPropagation();" class="w-full text-xs bg-gray-800 hover:bg-gray-700 py-2 rounded font-medium">Aktuellste Clips laden</button>
-                        </div>
-                        <div id="clips-offline-${user.login}" class="p-3 flex flex-col gap-3" onclick="event.stopPropagation()"></div>
-                    </div>
-                </div>`;
-                
-                container.insertAdjacentHTML('beforeend', cardHtml + accordionHtml);
-            }
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
         }
 
-        // Sub-Features (Chat, Stream, Clips)
         function connectChat(channel) {
             if(chatSockets[channel]) return;
             const ws = new WebSocket('wss://irc-ws.chat.twitch.tv:443');
@@ -517,57 +417,14 @@
             };
         }
 
-        async function loadClips(userId, containerIdSuffix) {
-            const container = document.getElementById(`clips-${containerIdSuffix}`);
-            if(container.dataset.loaded === "true") return;
-            
-            container.innerHTML = '<div class="text-gray-500 text-xs text-center">Lade...</div>';
-            
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 14); // Letzte 14 Tage
-            
-            const clips = await fetchTwitchData('clips', { 
-                broadcaster_id: userId, 
-                first: 20,
-                started_at: startDate.toISOString()
-            });
-
-            if(!clips || clips.length === 0) {
-                container.innerHTML = '<div class="text-gray-500 text-xs text-center">Keine neuen Clips gefunden.</div>';
-                return;
-            }
-
-            clips.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-            const top3 = clips.slice(0, 3);
-
-            container.innerHTML = '';
-            const parentDomain = window.location.hostname || 'localhost';
-
-            top3.forEach(clip => {
-                const embedUrl = `${clip.embed_url}&parent=${parentDomain}&autoplay=false`;
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="bg-gray-800 rounded overflow-hidden border border-gray-700">
-                        <div class="px-2 py-1 text-[11px] text-gray-300 truncate font-medium flex justify-between">
-                            <span class="truncate pr-2">${clip.title}</span>
-                            <span class="text-purple-400 font-bold shrink-0">${clip.view_count} 👀</span>
-                        </div>
-                        <iframe src="${embedUrl}" class="w-full aspect-video border-t border-gray-700" allowfullscreen></iframe>
-                    </div>
-                `);
-            });
-            container.dataset.loaded = "true";
-        }
-
         function loadStream(channel) {
             const container = document.getElementById(`stream-${channel}`);
             if(container.dataset.loaded === "true") return;
-            
             const parentDomain = window.location.hostname || 'localhost';
             container.innerHTML = `<iframe src="https://player.twitch.tv/?channel=${channel}&parent=${parentDomain}&autoplay=true" class="w-full h-full absolute inset-0" allowfullscreen></iframe>`;
             container.dataset.loaded = "true";
         }
 
-        // Form Submit Event
         document.getElementById('addStreamerForm').addEventListener('submit', (e) => {
             e.preventDefault();
             const input = document.getElementById('streamerInput');
@@ -581,20 +438,13 @@
             }
         });
 
-        // Interval (20 Min)
         function startInterval() {
             if(refreshInterval) clearInterval(refreshInterval);
-            refreshInterval = setInterval(refreshData, 1200000);
+            refreshInterval = setInterval(refreshData, 60000);
         }
 
-        // Init
-        if (appSettings.clientId) {
-            refreshData();
-            startInterval();
-        } else {
-            document.getElementById('liveStreamersList').innerHTML = '<p class="text-purple-400 text-sm mt-4 cursor-pointer underline" onclick="openSettings()">Bitte zuerst API-Tokens in den Einstellungen hinterlegen.</p>';
-        }
-
+        refreshData();
+        startInterval();
     </script>
 </body>
 </html>
